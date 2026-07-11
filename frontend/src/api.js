@@ -53,6 +53,8 @@ const api = {
     safeFetch(`${API_URL}/auth/google`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   updateProfile: (body) =>
     safeFetch(`${API_URL}/auth/profile`, { method: 'PUT', headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
+  changePassword: (body) =>
+    safeFetch(`${API_URL}/auth/change-password`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(body) }).then(handleResponse),
   getMe: () =>
     safeFetch(`${API_URL}/auth/me`, { headers: getHeaders() }).then(handleResponse),
 

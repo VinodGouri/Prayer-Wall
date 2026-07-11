@@ -13,11 +13,14 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSuccess = (user) => {
-    if (!user.assemblyName) {
+    if (user.mustChangePassword) {
+      navigate('/change-password');
+    } else if (!user.assemblyName) {
       navigate('/onboarding');
     } else {
       navigate('/');
@@ -176,13 +179,25 @@ export default function LoginPage() {
           </div>
           
           <div className="form-group">
-            <input
-              type="password"
-              className="form-input"
-              placeholder={t('password')}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="form-input"
+                placeholder={t('password')}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                style={{ paddingRight: '44px' }}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           {error && (

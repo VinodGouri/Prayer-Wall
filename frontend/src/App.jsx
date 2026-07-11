@@ -12,13 +12,14 @@ import PostPrayerPage from './pages/PostPrayerPage';
 import CelebratePage from './pages/CelebratePage';
 import MyPrayersPage from './pages/MyPrayersPage';
 import AdminDashboard from './pages/AdminDashboard';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 
 // You can replace this with your actual Google Client ID via env variables
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '1234567890-mockclientid.apps.googleusercontent.com';
 
 function AppLayout() {
   const location = useLocation();
-  const hideNav = location.pathname === '/login' || location.pathname === '/onboarding';
+  const hideNav = location.pathname === '/login' || location.pathname === '/onboarding' || location.pathname === '/change-password';
 
   return (
     <div className="app-layout">
@@ -26,6 +27,7 @@ function AppLayout() {
         <Route path="/" element={<PrayerWallPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route path="/post" element={<PostPrayerPage />} />
         <Route path="/celebrate" element={<CelebratePage />} />
         <Route path="/my-prayers" element={<MyPrayersPage />} />

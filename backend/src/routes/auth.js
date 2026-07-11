@@ -23,6 +23,7 @@ const getUserResponse = (user) => ({
   role: user.role,
   avatar: user.avatar,
   assemblyName: user.assemblyName,
+  mustChangePassword: user.mustChangePassword || false,
 });
 
 // POST /api/auth/register (Email/Password)
@@ -91,6 +92,44 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// POST /api/auth/change-password (Force change on first login)
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current password and new password are required' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ message: 'New password must be different from current password' });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, req.user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Hash and set new password
+    const salt = await bcrypt.genSalt(10);
+    req.user.password = await bcrypt.hash(newPassword, salt);
+    req.user.mustChangePassword = false;
+    await req.user.save();
+
+    res.json({
+      message: 'Password changed successfully',
+      user: getUserResponse(req.user),
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ message: 'Error changing password' });
   }
 });
 

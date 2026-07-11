@@ -9,6 +9,7 @@ const myPrayerRoutes = require('./routes/myPrayers');
 const testimonialRoutes = require('./routes/testimonials');
 const adminRoutes = require('./routes/admin');
 const { seedCategories } = require('./utils/seedCategories');
+const { seedAdmin } = require('./utils/seedAdmin');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -59,6 +60,7 @@ app.get('/api/categories', async (req, res) => {
 const start = async () => {
   await connectDB();
   await seedCategories();
+  await seedAdmin();
   app.listen(PORT, () => {
     console.log(`🙏 Prayer Wall Backend running on port ${PORT}`);
   });
