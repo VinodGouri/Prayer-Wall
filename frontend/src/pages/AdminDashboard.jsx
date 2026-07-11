@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 import api from '../api';
 
 export default function AdminDashboard() {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const { t, lang } = useLang();
   const [dashboard, setDashboard] = useState(null);
   const [pendingTestimonies, setPendingTestimonies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,7 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this prayer permanently?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     try {
       await api.deletePrayer(id);
       setDashboard(prev => ({
@@ -78,7 +80,7 @@ export default function AdminDashboard() {
     return (
       <div className="admin-page">
         <div className="empty-state">
-          <p className="empty-state-text">Loading dashboard...</p>
+          <p className="empty-state-text">{t('loading')}</p>
         </div>
       </div>
     );
@@ -88,7 +90,7 @@ export default function AdminDashboard() {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return new Date(dateStr).toLocaleDateString(lang === 'te' ? 'te-IN' : 'en-US', {
       month: 'short', day: 'numeric', year: 'numeric',
     });
   };
@@ -98,7 +100,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0' }}>
         <div>
-          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>⛪ Admin Dashboard</span>
+          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>{t('adminDashboard')}</span>
         </div>
         <button
           onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
@@ -107,36 +109,36 @@ export default function AdminDashboard() {
             border: '1px solid #e2e8f0', color: '#64748b',
           }}
         >
-          Logout
+          {t('logout')}
         </button>
       </div>
 
       {/* Greeting */}
       <div className="admin-greeting">
-        <h2>Peace be with you, {user?.name || 'Admin'}.</h2>
-        <p>Here is the current state of the Prayer Wall ecosystem.</p>
+        <h2>{t('peaceBeWithYou')} {user?.name || 'Admin'}.</h2>
+        <p>{t('adminDesc')}</p>
       </div>
 
       {/* Stats Grid */}
       <div className="admin-stats">
         <div className="admin-stat-card">
           <div className="admin-stat-icon">🤍</div>
-          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>+{stats.todayPrayers || 0} today</div>
+          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>+{stats.todayPrayers || 0} {t('today')}</div>
           <div className="admin-stat-value">{stats.activePrayers || 0}</div>
-          <div className="admin-stat-label">Active Prayers</div>
+          <div className="admin-stat-label">{t('activePrayers')}</div>
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-icon">✅</div>
-          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Total</div>
+          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{t('total')}</div>
           <div className="admin-stat-value">{stats.answeredPrayers || 0}</div>
-          <div className="admin-stat-label">Answered Prayers</div>
+          <div className="admin-stat-label">{t('answeredPrayers')}</div>
         </div>
       </div>
 
       {/* Oldest Active Requests */}
       {dashboard?.oldestActive?.length > 0 && (
         <div style={{ marginBottom: '24px' }}>
-          <h3 className="admin-section-title">❗ Oldest Active Requests</h3>
+          <h3 className="admin-section-title">{t('oldestActiveRequests')}</h3>
           {dashboard.oldestActive.slice(0, 5).map(prayer => (
             <div className="admin-prayer-item" key={prayer._id}>
               <div className="admin-prayer-item-header">
@@ -146,7 +148,7 @@ export default function AdminDashboard() {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{prayer.name}</div>
                   <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                    Posted {formatDate(prayer.createdAt)} · {prayer.assemblyName}
+                    {t('posted')} {formatDate(prayer.createdAt)} · {prayer.assemblyName}
                   </div>
                 </div>
                 <span className="prayer-card-category" style={{ fontSize: '0.6rem' }}>
@@ -156,10 +158,10 @@ export default function AdminDashboard() {
               <p className="admin-prayer-item-text">"{prayer.prayerText}"</p>
               <div className="admin-actions">
                 <button className="admin-action-btn contact" onClick={() => {}}>
-                  View Details
+                  {t('viewDetails')}
                 </button>
                 <button className="admin-action-btn approve" onClick={() => handleMarkReached(prayer._id)}>
-                  Mark as Reached Out
+                  {t('markAsReachedOut')}
                 </button>
               </div>
             </div>
@@ -170,27 +172,27 @@ export default function AdminDashboard() {
       {/* Pending Testimonies */}
       {pendingTestimonies.length > 0 && (
         <div style={{ marginBottom: '24px' }}>
-          <h3 className="admin-section-title">🕐 Pending Testimonies ({pendingTestimonies.length})</h3>
-          {pendingTestimonies.map(t => (
-            <div className="admin-prayer-item" key={t._id}>
+          <h3 className="admin-section-title">{t('pendingTestimonies')} ({pendingTestimonies.length})</h3>
+          {pendingTestimonies.map(testimony => (
+            <div className="admin-prayer-item" key={testimony._id}>
               <div className="admin-prayer-item-header">
                 <div className="admin-prayer-item-avatar">
-                  {t.userId?.name?.[0]?.toUpperCase() || '?'}
+                  {testimony.userId?.name?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{t.userId?.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>{testimony.userId?.name}</div>
                   <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-                    {t.prayerId?.category} · {formatDate(t.createdAt)}
+                    {testimony.prayerId?.category} · {formatDate(testimony.createdAt)}
                   </div>
                 </div>
               </div>
-              <p className="admin-prayer-item-text">"{t.testimonyText}"</p>
+              <p className="admin-prayer-item-text">"{testimony.testimonyText}"</p>
               <div className="admin-actions">
-                <button className="admin-action-btn approve" onClick={() => handleApprove(t._id)}>
-                  ✓ Approve
+                <button className="admin-action-btn approve" onClick={() => handleApprove(testimony._id)}>
+                  {t('approve')}
                 </button>
-                <button className="admin-action-btn reject" onClick={() => handleReject(t._id)}>
-                  ✕ Reject
+                <button className="admin-action-btn reject" onClick={() => handleReject(testimony._id)}>
+                  {t('reject')}
                 </button>
               </div>
             </div>
@@ -200,9 +202,9 @@ export default function AdminDashboard() {
 
       {/* Prayer Management Feed */}
       <div>
-        <h3 className="admin-section-title">📋 Prayer Management Feed</h3>
+        <h3 className="admin-section-title">{t('prayerManagement')}</h3>
         <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '12px' }}>
-          Review and manage recent community submissions.
+          {t('prayerManagementDesc')}
         </p>
         {dashboard?.recentPrayers?.map(prayer => (
           <div className="admin-prayer-item" key={prayer._id}>
@@ -212,7 +214,7 @@ export default function AdminDashboard() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: '0.88rem' }}>
-                  {prayer.anonymous ? 'Anonymous' : prayer.name}
+                  {prayer.anonymous ? t('anonymous') : prayer.name}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
                   {prayer.category} · {prayer.assemblyName}
@@ -225,16 +227,16 @@ export default function AdminDashboard() {
                 background: '#eff6ff', padding: '8px 12px', borderRadius: '8px',
                 marginBottom: '8px', fontSize: '0.8rem',
               }}>
-                📞 Contact Personally<br />
+                {t('contactPersonally')}<br />
                 <span style={{ fontWeight: 600 }}>{prayer.phone}</span>
               </div>
             )}
             <div className="admin-actions">
               <button className="admin-action-btn contact">
-                {prayer.prayerCount} People Prayed
+                {prayer.prayerCount} {t('peoplePrayed')}
               </button>
               <button className="admin-action-btn reject" onClick={() => handleDelete(prayer._id)}>
-                🗑 Delete
+                {t('deletePrayer')}
               </button>
             </div>
           </div>

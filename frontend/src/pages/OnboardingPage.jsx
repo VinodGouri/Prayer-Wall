@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 
 export default function OnboardingPage() {
   const { updateProfile } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLang();
   const [assemblyName, setAssemblyName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,18 +27,18 @@ export default function OnboardingPage() {
   return (
     <div className="login-page">
       <div className="login-icon">⛪</div>
-      <h1 className="login-title">Welcome</h1>
+      <h1 className="login-title">{t('welcomeTitle')}</h1>
       <p className="login-subtitle">
-        Before you join the prayer wall, please tell us where you are joining from.
+        {t('welcomeSubtitle')}
       </p>
 
       <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '300px' }}>
         <div className="form-group">
-          <label className="form-label">Assembly location or Village name</label>
+          <label className="form-label">{t('assemblyLabel')}</label>
           <input
             type="text"
             className="form-input"
-            placeholder="e.g. Grace Fellowship, Springfield"
+            placeholder={t('assemblyPlaceholder')}
             value={assemblyName}
             onChange={e => setAssemblyName(e.target.value)}
             autoFocus
@@ -44,7 +46,7 @@ export default function OnboardingPage() {
         </div>
 
         <button type="submit" className="submit-btn" disabled={loading || !assemblyName.trim()}>
-          {loading ? 'Saving...' : 'Continue to Wall'}
+          {loading ? t('saving') : t('continueToWall')}
         </button>
       </form>
     </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useLang } from '../context/LanguageContext';
 
 export default function SearchOverlay({ onClose, onSearch }) {
   const [query, setQuery] = useState('');
+  const { t } = useLang();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -19,13 +21,13 @@ export default function SearchOverlay({ onClose, onSearch }) {
           </button>
           <input
             type="text"
-            placeholder="Search prayers, names, churches..."
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoFocus
             id="search-input"
           />
-          <button type="submit" aria-label="Search" style={{ fontSize: '1rem' }}>
+          <button type="submit" aria-label={t('search')} style={{ fontSize: '1rem' }}>
             🔍
           </button>
         </div>
@@ -33,7 +35,7 @@ export default function SearchOverlay({ onClose, onSearch }) {
 
       {query.length > 0 && (
         <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
-          Press Enter to search for "{query}"
+          {t('pressEnterToSearch')} "{query}"
         </div>
       )}
     </div>

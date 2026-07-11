@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 
 export default function PrayerCard({ prayer, onPray }) {
   const { isGuest } = useAuth();
+  const { t } = useLang();
   const [prayed, setPrayed] = useState(prayer.hasPrayed || false);
   const [count, setCount] = useState(prayer.prayerCount || 0);
   const [animating, setAnimating] = useState(false);
@@ -24,7 +26,7 @@ export default function PrayerCard({ prayer, onPray }) {
   };
 
   const initial = prayer.name?.[0]?.toUpperCase() || '?';
-  const displayName = prayer.anonymous ? 'Anonymous' : prayer.name;
+  const displayName = prayer.anonymous ? t('anonymous') : prayer.name;
 
   return (
     <div className="prayer-card" id={`prayer-card-${prayer._id}`}>
@@ -48,7 +50,7 @@ export default function PrayerCard({ prayer, onPray }) {
       <div className="prayer-card-footer" style={{ marginBottom: '12px' }}>
         <span className="prayer-card-count">
           <span className={`heart-icon ${animating ? 'heart-pop' : ''}`}>❤️</span>{' '}
-          {count} believers praying
+          {count} {t('believersPraying')}
         </span>
       </div>
 
@@ -58,7 +60,7 @@ export default function PrayerCard({ prayer, onPray }) {
         disabled={prayed || isGuest}
         id={`pray-btn-${prayer._id}`}
       >
-        {prayed ? '🙏 You\'re Praying' : '🤍 I\'m Praying'}
+        {prayed ? t('yourePraying') : t('imPraying')}
       </button>
     </div>
   );

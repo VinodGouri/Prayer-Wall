@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import TopHeader from '../components/TopHeader';
 import TestimonyCard from '../components/TestimonyCard';
+import { useLang } from '../context/LanguageContext';
 import api from '../api';
 
 export default function CelebratePage() {
+  const { t } = useLang();
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,27 +24,27 @@ export default function CelebratePage() {
 
   return (
     <>
-      <TopHeader title="Testimonies" />
+      <TopHeader title={t('testimonies')} />
 
       <div className="celebrate-hero">
-        <h1>Sacred Stories</h1>
-        <p>Witness the beauty of God's faithfulness in the lives of our community.</p>
+        <h1>{t('sacredStories')}</h1>
+        <p>{t('celebrateDesc')}</p>
       </div>
 
       {loading ? (
         <div className="empty-state">
           <div className="empty-state-icon">✨</div>
-          <p className="empty-state-text">Loading testimonies...</p>
+          <p className="empty-state-text">{t('loadingTestimonies')}</p>
         </div>
       ) : testimonials.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🙌</div>
-          <p className="empty-state-title">No testimonies yet</p>
-          <p className="empty-state-text">When prayers are answered and testimonies shared, they'll appear here.</p>
+          <p className="empty-state-title">{t('noTestimonies')}</p>
+          <p className="empty-state-text">{t('noTestimoniesDesc')}</p>
         </div>
       ) : (
-        testimonials.map(t => (
-          <TestimonyCard key={t.id} testimony={t} />
+        testimonials.map(testimony => (
+          <TestimonyCard key={testimony.id} testimony={testimony} />
         ))
       )}
     </>

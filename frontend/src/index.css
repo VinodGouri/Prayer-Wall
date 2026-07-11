@@ -249,6 +249,37 @@ button {
   background: var(--color-primary-50);
 }
 
+/* ──────────── Language Toggle ──────────── */
+.lang-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-primary-600);
+  background: var(--color-primary-50);
+  border: 1.5px solid var(--color-primary-200);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  font-family: var(--font-sans), 'Noto Sans Telugu', sans-serif;
+}
+
+.lang-toggle-btn:hover {
+  background: var(--color-primary-100);
+  border-color: var(--color-primary-400);
+  transform: scale(1.05);
+}
+
+.lang-toggle-btn:active {
+  transform: scale(0.95);
+}
+
 /* ──────────── Bottom Navigation ──────────── */
 .bottom-nav {
   position: fixed;

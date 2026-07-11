@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 
 export default function TopHeader({ title, onSearchOpen }) {
   const [showMenu, setShowMenu] = useState(false);
   const { isGuest, logout } = useAuth();
   const navigate = useNavigate();
+  const { lang, toggleLang, t } = useLang();
 
   const handleLogout = () => {
     logout();
@@ -18,7 +20,7 @@ export default function TopHeader({ title, onSearchOpen }) {
         <button 
           className="top-header-btn" 
           onClick={() => setShowMenu(!showMenu)}
-          aria-label="Menu" 
+          aria-label={t('menu')} 
           id="menu-btn"
         >
           ☰
@@ -53,7 +55,7 @@ export default function TopHeader({ title, onSearchOpen }) {
                     color: '#dc2626'
                   }}
                 >
-                  Logout
+                  {t('logout')}
                 </button>
               ) : (
                 <button 
@@ -67,7 +69,7 @@ export default function TopHeader({ title, onSearchOpen }) {
                     color: '#2563eb'
                   }}
                 >
-                  Sign In
+                  {t('signIn')}
                 </button>
               )}
             </div>
@@ -75,15 +77,28 @@ export default function TopHeader({ title, onSearchOpen }) {
         )}
       </div>
 
-      <span className="top-header-title">{title || 'Prayer Wall'}</span>
+      <span className="top-header-title">{title || t('prayerWall')}</span>
       
-      {onSearchOpen ? (
-        <button className="top-header-btn" onClick={onSearchOpen} aria-label="Search" id="search-btn">
-          🔍
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        {/* Language Toggle */}
+        <button
+          className="lang-toggle-btn"
+          onClick={toggleLang}
+          aria-label="Toggle language"
+          id="lang-toggle-btn"
+          title={lang === 'en' ? 'తెలుగులో చూడండి' : 'View in English'}
+        >
+          {lang === 'en' ? 'తె' : 'EN'}
         </button>
-      ) : (
-        <div style={{ width: 36 }} /> /* Placeholder for alignment */
-      )}
+
+        {onSearchOpen ? (
+          <button className="top-header-btn" onClick={onSearchOpen} aria-label={t('search')} id="search-btn">
+            🔍
+          </button>
+        ) : (
+          <div style={{ width: 36 }} /> /* Placeholder for alignment */
+        )}
+      </div>
     </header>
   );
 }

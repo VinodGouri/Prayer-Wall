@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LanguageContext';
 
 export default function LoginPage() {
   const { login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
+  const { t, lang, toggleLang } = useLang();
   
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [name, setName] = useState('');
@@ -25,7 +27,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password || (mode === 'register' && !name)) {
-      setError('Please fill in all required fields.');
+      setError(t('fillAllFields'));
       return;
     }
     
@@ -100,10 +102,21 @@ export default function LoginPage() {
 
   return (
     <div className="login-page" id="login-page">
+      {/* Language toggle on login page */}
+      <button
+        className="lang-toggle-btn"
+        onClick={toggleLang}
+        aria-label="Toggle language"
+        style={{ position: 'absolute', top: '16px', right: '16px' }}
+        title={lang === 'en' ? 'తెలుగులో చూడండి' : 'View in English'}
+      >
+        {lang === 'en' ? 'తె' : 'EN'}
+      </button>
+
       <div className="login-icon">⛪</div>
-      <h1 className="login-title">Prayer Wall</h1>
+      <h1 className="login-title">{t('loginTitle')}</h1>
       <p className="login-subtitle">
-        Join believers worldwide in the ministry of prayer.
+        {t('loginSubtitle')}
       </p>
 
       <div style={{ width: '100%', maxWidth: '300px', marginBottom: '24px' }}>
@@ -113,12 +126,12 @@ export default function LoginPage() {
           type="button"
           disabled={loading}
         >
-          <span style={{ fontSize: '1.2rem' }}>G</span> Continue with Google
+          <span style={{ fontSize: '1.2rem' }}>G</span> {t('continueWithGoogle')}
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0' }}>
           <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-          <span style={{ padding: '0 10px', fontSize: '0.8rem', color: '#64748b' }}>OR</span>
+          <span style={{ padding: '0 10px', fontSize: '0.8rem', color: '#64748b' }}>{t('or')}</span>
           <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
         </div>
 
@@ -128,14 +141,14 @@ export default function LoginPage() {
             className={`tab ${mode === 'login' ? 'active' : ''}`}
             onClick={() => setMode('login')}
           >
-            Sign In
+            {t('signIn')}
           </button>
           <button
             type="button"
             className={`tab ${mode === 'register' ? 'active' : ''}`}
             onClick={() => setMode('register')}
           >
-            Register
+            {t('register')}
           </button>
         </div>
 
@@ -145,7 +158,7 @@ export default function LoginPage() {
               <input
                 type="text"
                 className="form-input"
-                placeholder="Full Name"
+                placeholder={t('fullName')}
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
@@ -156,7 +169,7 @@ export default function LoginPage() {
             <input
               type="email"
               className="form-input"
-              placeholder="Email address"
+              placeholder={t('emailAddress')}
               value={email}
               onChange={e => setEmail(e.target.value)}
             />
@@ -166,7 +179,7 @@ export default function LoginPage() {
             <input
               type="password"
               className="form-input"
-              placeholder="Password"
+              placeholder={t('password')}
               value={password}
               onChange={e => setPassword(e.target.value)}
             />
@@ -179,13 +192,13 @@ export default function LoginPage() {
           )}
 
           <button type="submit" className="submit-btn" disabled={loading}>
-            {loading ? 'Processing...' : (mode === 'login' ? 'Sign In' : 'Create Account')}
+            {loading ? t('processing') : (mode === 'login' ? t('signIn') : t('createAccount'))}
           </button>
         </form>
       </div>
 
       <button className="guest-btn" onClick={handleGuest} id="guest-btn">
-        Continue as Guest →
+        {t('continueAsGuest')}
       </button>
     </div>
   );

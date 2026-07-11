@@ -2,15 +2,11 @@ import { useState, useEffect } from 'react';
 import TopHeader from '../components/TopHeader';
 import PrayerCard from '../components/PrayerCard';
 import SearchOverlay from '../components/SearchOverlay';
+import { useLang } from '../context/LanguageContext';
 import api from '../api';
 
-const SORT_OPTIONS = [
-  { key: 'newest', label: 'Newest' },
-  { key: 'most_prayed', label: 'Most Prayed' },
-  { key: 'oldest', label: 'Oldest' },
-];
-
 export default function PrayerWallPage() {
+  const { t } = useLang();
   const [prayers, setPrayers] = useState([]);
   const [sort, setSort] = useState('newest');
   const [search, setSearch] = useState('');
@@ -18,6 +14,12 @@ export default function PrayerWallPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const SORT_OPTIONS = [
+    { key: 'newest', label: t('newest') },
+    { key: 'most_prayed', label: t('mostPrayed') },
+    { key: 'oldest', label: t('oldest') },
+  ];
 
   const fetchPrayers = async () => {
     setLoading(true);
@@ -49,7 +51,7 @@ export default function PrayerWallPage() {
 
   return (
     <>
-      <TopHeader title="Prayer Wall" onSearchOpen={() => setShowSearch(true)} />
+      <TopHeader title={t('prayerWall')} onSearchOpen={() => setShowSearch(true)} />
 
       {showSearch && (
         <SearchOverlay
@@ -60,8 +62,8 @@ export default function PrayerWallPage() {
 
       {/* Hero section */}
       <div className="wall-hero">
-        <p className="wall-hero-label">MORNING DEVOTION</p>
-        <h1 className="wall-hero-title">Find peace in communal prayer today.</h1>
+        <p className="wall-hero-label">{t('morningDevotion')}</p>
+        <h1 className="wall-hero-title">{t('heroTitle')}</h1>
       </div>
 
       {/* Sort chips */}
@@ -80,12 +82,12 @@ export default function PrayerWallPage() {
 
       {search && (
         <div style={{ padding: '0 20px 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Results for "{search}"</span>
+          <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('resultsFor')} "{search}"</span>
           <button
             onClick={() => { setSearch(''); setPage(1); }}
             style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: 600 }}
           >
-            Clear
+            {t('clear')}
           </button>
         </div>
       )}
@@ -94,13 +96,13 @@ export default function PrayerWallPage() {
       {loading ? (
         <div className="empty-state">
           <div className="empty-state-icon">🙏</div>
-          <p className="empty-state-text">Loading prayers...</p>
+          <p className="empty-state-text">{t('loadingPrayers')}</p>
         </div>
       ) : prayers.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🕊️</div>
-          <p className="empty-state-title">No prayers yet</p>
-          <p className="empty-state-text">Be the first to share a prayer request with the community.</p>
+          <p className="empty-state-title">{t('noPrayersYet')}</p>
+          <p className="empty-state-text">{t('noPrayersDesc')}</p>
         </div>
       ) : (
         <>
@@ -115,7 +117,7 @@ export default function PrayerWallPage() {
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
-                ← Prev
+                {t('prev')}
               </button>
               <span style={{ padding: '8px', fontSize: '0.85rem', color: '#64748b' }}>
                 {page} / {totalPages}
@@ -125,7 +127,7 @@ export default function PrayerWallPage() {
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
               >
-                Next →
+                {t('next')}
               </button>
             </div>
           )}

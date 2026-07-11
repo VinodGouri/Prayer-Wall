@@ -1,4 +1,7 @@
+import { useLang } from '../context/LanguageContext';
+
 export default function TestimonyCard({ testimony }) {
+  const { t } = useLang();
   const initial = testimony.user?.name?.[0]?.toUpperCase() || '?';
 
   return (
@@ -6,12 +9,12 @@ export default function TestimonyCard({ testimony }) {
       <div className="testimony-header">
         <div className="testimony-avatar">{initial}</div>
         <div className="testimony-user-info">
-          <div className="testimony-user-name">{testimony.user?.name || 'Anonymous'}</div>
+          <div className="testimony-user-name">{testimony.user?.name || t('anonymous')}</div>
           <span className="testimony-user-category">
-            {testimony.prayer?.category || 'General'}
+            {testimony.prayer?.category || t('general')}
           </span>
         </div>
-        <span className="testimony-badge">🎉 GOD ANSWERED</span>
+        <span className="testimony-badge">{t('godAnswered')}</span>
       </div>
 
       <div className="testimony-prayer-text">

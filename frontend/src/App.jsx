@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import BottomNav from './components/BottomNav';
 import SplashScreen from './pages/SplashScreen';
 import LoginPage from './pages/LoginPage';
@@ -39,16 +40,22 @@ export default function App() {
   const [splashDone, setSplashDone] = useState(false);
 
   if (!splashDone) {
-    return <SplashScreen onFinish={() => setSplashDone(true)} />;
+    return (
+      <LanguageProvider>
+        <SplashScreen onFinish={() => setSplashDone(true)} />
+      </LanguageProvider>
+    );
   }
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthProvider>
-        <Router>
-          <AppLayout />
-        </Router>
-      </AuthProvider>
-    </GoogleOAuthProvider>
+    <LanguageProvider>
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+        <AuthProvider>
+          <Router>
+            <AppLayout />
+          </Router>
+        </AuthProvider>
+      </GoogleOAuthProvider>
+    </LanguageProvider>
   );
 }

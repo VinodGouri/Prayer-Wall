@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useLang } from '../context/LanguageContext';
 
 export default function SplashScreen({ onFinish }) {
   const [visible, setVisible] = useState(true);
+  const { t } = useLang();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -19,18 +21,18 @@ export default function SplashScreen({ onFinish }) {
       <div className="splash-overlay" />
 
       <div className="splash-icon">⛪</div>
-      <h1 className="splash-title">Prayer Wall</h1>
-      <p className="splash-subtitle">SACRED STILLNESS</p>
+      <h1 className="splash-title">{t('splashTitle')}</h1>
+      <p className="splash-subtitle">{t('splashSubtitle')}</p>
 
       <p className="splash-verse">
-        "Therefore I tell you, whatever you ask in prayer, believe that you have received it, and it will be yours."
+        {t('splashVerse')}
       </p>
-      <p className="splash-ref">— MARK 11:24</p>
+      <p className="splash-ref">{t('splashRef')}</p>
 
       <div className="splash-loader">
         <div className="splash-loader-bar" />
       </div>
-      <p className="splash-loading-text">Preparing your sanctuary...</p>
+      <p className="splash-loading-text">{t('splashLoading')}</p>
     </div>
   );
 }
