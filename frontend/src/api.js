@@ -19,18 +19,27 @@ const handleResponse = async (res) => {
   return data;
 };
 
-// Wrapper to catch network-level errors (backend unreachable, CORS blocked, etc.)
-const safeFetch = async (url, options) => {
-  try {
-    return await fetch(url, options);
-  } catch (err) {
-    // TypeError: Failed to fetch — backend is down or CORS is blocking
-    if (err instanceof TypeError && err.message.includes('fetch')) {
-      throw new Error(
-        'Unable to connect to the server. Please check that the backend is running and try again.'
-      );
+// Wrapper to catch network-level errors with automatic retry for transient failures
+// (e.g. Railway cold starts, temporary network hiccups)
+const safeFetch = async (url, options, retries = 2) => {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      const isNetworkError = err instanceof TypeError && err.message.includes('fetch');
+      // If it's a network error and we have retries left, wait and try again
+      if (isNetworkError && attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // 1s, 2s backoff
+        continue;
+      }
+      // Final attempt failed
+      if (isNetworkError) {
+        throw new Error(
+          'Unable to connect to the server. Please try again in a moment.'
+        );
+      }
+      throw err;
     }
-    throw err;
   }
 };
 
