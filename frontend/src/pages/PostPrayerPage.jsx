@@ -196,11 +196,11 @@ export default function PostPrayerPage() {
           {/* Assembly Name (For Guests only) */}
           {isGuest && (
             <div className="form-group">
-              <label className="form-label">Assembly Location or Village Name</label>
+              <label className="form-label">{t('assemblyLabel')}</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g. Grace Fellowship, Springfield"
+                placeholder={t('assemblyPlaceholder')}
                 value={assemblyName}
                 onChange={e => setAssemblyName(e.target.value)}
                 id="input-assembly-guest"
