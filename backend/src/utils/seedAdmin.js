@@ -19,11 +19,28 @@ const seedAdmin = async () => {
         mustChangePassword: true,
       });
       console.log('✅ Admin account seeded (lemuelgouri2244@gmail.com)');
-    } else if (existing.role !== 'admin') {
-      // If the user exists but is not admin, promote them
-      existing.role = 'admin';
-      await existing.save();
-      console.log('✅ Existing user promoted to admin');
+    } else {
+      let updated = false;
+
+      // If existing user has no password (e.g. registered via Google previously),
+      // set the initial password and force change password on login
+      if (!existing.password) {
+        const salt = await bcrypt.genSalt(10);
+        existing.password = await bcrypt.hash('TestAdmin@123', salt);
+        existing.mustChangePassword = true;
+        updated = true;
+        console.log('✅ Password set for existing admin user');
+      }
+
+      if (existing.role !== 'admin') {
+        existing.role = 'admin';
+        updated = true;
+        console.log('✅ Existing user promoted to admin');
+      }
+
+      if (updated) {
+        await existing.save();
+      }
     }
   } catch (error) {
     console.error('Error seeding admin:', error);
