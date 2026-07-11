@@ -18,9 +18,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const handleSuccess = (user) => {
-    if (user.mustChangePassword) {
-      navigate('/change-password');
-    } else if (!user.assemblyName) {
+    if (!user.assemblyName) {
       navigate('/onboarding');
     } else {
       navigate('/');
