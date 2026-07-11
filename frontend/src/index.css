@@ -515,6 +515,18 @@ button {
   transform: none;
 }
 
+.translate-toggle-btn {
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.translate-toggle-btn:hover {
+  background-color: var(--color-primary-50) !important;
+}
+
+.translate-toggle-btn:active {
+  transform: scale(0.96);
+}
+
 /* ──────────── Post Prayer Form ──────────── */
 .post-page {
   padding: 0 20px 40px;
