@@ -20,15 +20,41 @@ export default function MyPrayersPage() {
   const [testimonyModal, setTestimonyModal] = useState(null);
   const [testimonyText, setTestimonyText] = useState('');
 
+  // Get guest prayer IDs from local storage
+  const getGuestPrayerIds = () => {
+    try {
+      return JSON.parse(localStorage.getItem('guest_prayer_ids') || '[]');
+    } catch {
+      return [];
+    }
+  };
+
+  const guestIds = getGuestPrayerIds();
+
   const fetchPrayers = async () => {
     setLoading(true);
     try {
-      if (tab === 'active') {
-        const data = await api.getMyActive();
-        setActivePrayers(data.prayers);
+      if (isGuest) {
+        if (guestIds.length === 0) {
+          setActivePrayers([]);
+          setAnsweredPrayers([]);
+        } else {
+          if (tab === 'active') {
+            const data = await api.getMyActive(guestIds);
+            setActivePrayers(data.prayers);
+          } else {
+            const data = await api.getMyAnswered(guestIds);
+            setAnsweredPrayers(data.prayers);
+          }
+        }
       } else {
-        const data = await api.getMyAnswered();
-        setAnsweredPrayers(data.prayers);
+        if (tab === 'active') {
+          const data = await api.getMyActive();
+          setActivePrayers(data.prayers);
+        } else {
+          const data = await api.getMyAnswered();
+          setAnsweredPrayers(data.prayers);
+        }
       }
     } catch (error) {
       console.error('Error fetching my prayers:', error);
@@ -37,28 +63,8 @@ export default function MyPrayersPage() {
   };
 
   useEffect(() => {
-    if (!isGuest) fetchPrayers();
+    fetchPrayers();
   }, [tab, isGuest]);
-
-  if (isGuest) {
-    return (
-      <>
-        <TopHeader title={t('myPrayers')} />
-        <div className="empty-state">
-          <div className="empty-state-icon">🔒</div>
-          <p className="empty-state-title">{t('signInToView')}</p>
-          <p className="empty-state-text">{t('signInToViewDesc')}</p>
-          <button
-            className="submit-btn"
-            style={{ maxWidth: '200px', margin: '20px auto 0' }}
-            onClick={() => navigate('/login')}
-          >
-            {t('signIn')}
-          </button>
-        </div>
-      </>
-    );
-  }
 
   const handleMarkAnswered = async () => {
     if (!confirmPrayer) return;
@@ -106,12 +112,49 @@ export default function MyPrayersPage() {
     });
   };
 
+  const showSignInScreen = isGuest && guestIds.length === 0;
+
+  if (showSignInScreen) {
+    return (
+      <>
+        <TopHeader title={t('myPrayers')} />
+        <div className="empty-state">
+          <div className="empty-state-icon">🔒</div>
+          <p className="empty-state-title">{t('signInToView')}</p>
+          <p className="empty-state-text">{t('signInToViewDesc')}</p>
+          <button
+            className="submit-btn"
+            style={{ maxWidth: '200px', margin: '20px auto 0' }}
+            onClick={() => navigate('/login')}
+          >
+            {t('signIn')}
+          </button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <TopHeader title={t('prayerWall')} />
 
       <div className="my-prayers-page">
         <h1 className="my-prayers-title">{t('myPrayers')}</h1>
+
+        {isGuest && guestIds.length > 0 && (
+          <div style={{
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '20px',
+            fontSize: '0.82rem',
+            color: '#1e40af',
+            lineHeight: '1.4'
+          }}>
+            ℹ️ {t('guestWarning')}
+          </div>
+        )}
 
         <div className="tabs">
           <button

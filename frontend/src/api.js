@@ -73,10 +73,10 @@ const api = {
     safeFetch(`${API_URL}/prayers/${id}/undo-answered`, { method: 'POST', headers: getHeaders() }).then(handleResponse),
 
   // My Prayers
-  getMyActive: () =>
-    safeFetch(`${API_URL}/my-prayers/active`, { headers: getHeaders() }).then(handleResponse),
-  getMyAnswered: () =>
-    safeFetch(`${API_URL}/my-prayers/answered`, { headers: getHeaders() }).then(handleResponse),
+  getMyActive: (ids) =>
+    safeFetch(`${API_URL}/my-prayers/active${ids ? `?ids=${ids.join(',')}` : ''}`, { headers: getHeaders() }).then(handleResponse),
+  getMyAnswered: (ids) =>
+    safeFetch(`${API_URL}/my-prayers/answered${ids ? `?ids=${ids.join(',')}` : ''}`, { headers: getHeaders() }).then(handleResponse),
 
   // Testimonials
   getTestimonials: (params = {}) => {

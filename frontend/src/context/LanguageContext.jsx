@@ -95,7 +95,8 @@ const translations = {
     selectCategoryError: 'Please select a category.',
     enterPrayerError: 'Please enter your prayer request.',
     prayerLengthError: 'Prayer text must be 500 characters or less.',
-
+    shareAsGuest: 'Share as Guest User',
+    guestWarning: 'Note: Since you are not signed in, your prayer history will be saved on this device only. Clearing your browser\'s history or cache will erase it.',
     // Categories
     catHealth: 'Health',
     catMarriage: 'Marriage',
@@ -273,6 +274,8 @@ const translations = {
     selectCategoryError: 'దయచేసి ఒక వర్గమును ఎన్నుకొనుము.',
     enterPrayerError: 'దయచేసి మీ ప్రార్థనా విన్నపమును వ్రాయుము.',
     prayerLengthError: 'ప్రార్థన 500 అక్షరములు లేక తక్కువగా ఉండవలెను.',
+    shareAsGuest: 'అతిథిగా పంచుకొనుము',
+    guestWarning: 'గమనిక: మీరు లాగిన్ కానందున, మీ ప్రార్థనల చరిత్ర ఈ పరికరంలో మాత్రమే భద్రపరచబడుతుంది. బ్రౌజర్ చరిత్ర లేదా కాష్‌ను తొలగిస్తే అది తుడిచిపెట్టుకుపోతుంది.',
 
     // Categories
     catHealth: 'ఆరోగ్యము',

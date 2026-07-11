@@ -68,12 +68,13 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// POST /api/prayers — Create a new prayer request
-router.post('/', auth, async (req, res) => {
+// POST /api/prayers — Create a new prayer request (supports guests)
+router.post('/', optionalAuth, async (req, res) => {
   try {
     const { name, anonymous, category, prayerText, phone } = req.body;
     // Guest gets it from body, authenticated users get it from their profile
     const assemblyName = req.user ? req.user.assemblyName : req.body.assemblyName;
+    const displayName = req.user ? (name || req.user.name) : (name || 'Guest');
 
     if (!category || !prayerText || !assemblyName) {
       return res.status(400).json({ message: 'Category, prayer text, and assembly name are required' });
@@ -84,8 +85,8 @@ router.post('/', auth, async (req, res) => {
     }
 
     const prayer = new PrayerRequest({
-      userId: req.user._id,
-      name: name || req.user.name,
+      userId: req.user?._id || undefined,
+      name: displayName,
       anonymous: anonymous || false,
       category,
       prayerText,
@@ -139,16 +140,23 @@ router.post('/:id/pray', auth, async (req, res) => {
 });
 
 // POST /api/prayers/:id/answered — Mark prayer as answered (soft commit)
-router.post('/:id/answered', auth, async (req, res) => {
+router.post('/:id/answered', optionalAuth, async (req, res) => {
   try {
-    const prayer = await PrayerRequest.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      status: 'active',
-    });
+    const prayer = await PrayerRequest.findById(req.params.id);
 
     if (!prayer) {
       return res.status(404).json({ message: 'Prayer not found' });
+    }
+
+    if (prayer.status !== 'active') {
+      return res.status(400).json({ message: 'Prayer is not active' });
+    }
+
+    // Owner check: if prayer is owned by a registered user, require auth matching
+    if (prayer.userId) {
+      if (!req.user || prayer.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to mark this prayer as answered' });
+      }
     }
 
     prayer.status = 'pending_answered';
@@ -178,16 +186,23 @@ router.post('/:id/answered', auth, async (req, res) => {
 });
 
 // POST /api/prayers/:id/undo-answered — Undo within 5s grace window
-router.post('/:id/undo-answered', auth, async (req, res) => {
+router.post('/:id/undo-answered', optionalAuth, async (req, res) => {
   try {
-    const prayer = await PrayerRequest.findOne({
-      _id: req.params.id,
-      userId: req.user._id,
-      status: 'pending_answered',
-    });
+    const prayer = await PrayerRequest.findById(req.params.id);
 
     if (!prayer) {
-      return res.status(400).json({ message: 'Cannot undo — prayer is already committed or not found' });
+      return res.status(404).json({ message: 'Prayer not found' });
+    }
+
+    if (prayer.status !== 'pending_answered') {
+      return res.status(400).json({ message: 'Cannot undo — prayer is already committed or active' });
+    }
+
+    // Owner check: if prayer is owned by a registered user, require auth matching
+    if (prayer.userId) {
+      if (!req.user || prayer.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to restore this prayer' });
+      }
     }
 
     prayer.status = 'active';

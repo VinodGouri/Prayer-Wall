@@ -9,11 +9,14 @@ export default function PostPrayerPage() {
   const { user, isGuest } = useAuth();
   const navigate = useNavigate();
   const { t } = useLang();
+  
+  const [postAsGuest, setPostAsGuest] = useState(false);
   const [name, setName] = useState('');
   const [anonymous, setAnonymous] = useState(false);
   const [category, setCategory] = useState('');
   const [prayerText, setPrayerText] = useState('');
   const [phone, setPhone] = useState('');
+  const [assemblyName, setAssemblyName] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -40,7 +43,7 @@ export default function PostPrayerPage() {
     }
   }, [user, navigate]);
 
-  if (isGuest) {
+  if (isGuest && !postAsGuest) {
     return (
       <>
         <TopHeader title={t('shareYourRequest')} />
@@ -54,6 +57,21 @@ export default function PostPrayerPage() {
             onClick={() => navigate('/login')}
           >
             {t('signIn')}
+          </button>
+          
+          <div style={{ display: 'flex', alignItems: 'center', margin: '24px auto', width: '80%', maxWidth: '200px' }}>
+            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+            <span style={{ padding: '0 10px', fontSize: '0.8rem', color: '#64748b' }}>{t('or')}</span>
+            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          </div>
+
+          <button
+            className="guest-btn"
+            style={{ margin: '0 auto', display: 'block', textDecoration: 'underline' }}
+            onClick={() => setPostAsGuest(true)}
+            id="post-as-guest-btn"
+          >
+            {t('shareAsGuest')}
           </button>
         </div>
       </>
@@ -78,6 +96,7 @@ export default function PostPrayerPage() {
               setPrayerText('');
               setCategory('');
               setPhone('');
+              setAssemblyName('');
               setAnonymous(false);
             }}
           >
@@ -96,15 +115,29 @@ export default function PostPrayerPage() {
     if (!prayerText.trim()) return setError(t('enterPrayerError'));
     if (prayerText.length > 500) return setError(t('prayerLengthError'));
 
+    const finalAssembly = isGuest ? assemblyName.trim() : (user?.assemblyName || '');
+    if (isGuest && !finalAssembly) {
+      return setError('Please enter your assembly location or village name.');
+    }
+
     setSubmitting(true);
     try {
-      await api.createPrayer({
-        name: anonymous ? 'Anonymous' : name,
+      const data = await api.createPrayer({
+        name: anonymous ? 'Anonymous' : (name.trim() || 'Guest'),
         anonymous,
         category,
         prayerText: prayerText.trim(),
         phone: phone.trim(),
+        assemblyName: finalAssembly,
       });
+
+      // Save request ID locally for guests so they can see history under My Prayers
+      if (isGuest && data.prayer?._id) {
+        const guestIds = JSON.parse(localStorage.getItem('guest_prayer_ids') || '[]');
+        guestIds.push(data.prayer._id);
+        localStorage.setItem('guest_prayer_ids', JSON.stringify(guestIds));
+      }
+
       setSuccess(true);
     } catch (err) {
       setError(err.message);
@@ -121,6 +154,21 @@ export default function PostPrayerPage() {
       </p>
 
       <div className="post-page">
+        {isGuest && (
+          <div style={{
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '12px',
+            padding: '14px',
+            marginBottom: '20px',
+            fontSize: '0.82rem',
+            color: '#1e40af',
+            lineHeight: '1.4'
+          }}>
+            ℹ️ {t('guestWarning')}
+          </div>
+        )}
+
         <form className="post-form" onSubmit={handleSubmit} id="post-prayer-form">
           {/* Name */}
           <div className="form-group">
@@ -144,6 +192,22 @@ export default function PostPrayerPage() {
               <label htmlFor="checkbox-anonymous">{t('shareAsAnonymous')}</label>
             </div>
           </div>
+
+          {/* Assembly Name (For Guests only) */}
+          {isGuest && (
+            <div className="form-group">
+              <label className="form-label">Assembly Location or Village Name</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="e.g. Grace Fellowship, Springfield"
+                value={assemblyName}
+                onChange={e => setAssemblyName(e.target.value)}
+                id="input-assembly-guest"
+                required
+              />
+            </div>
+          )}
 
           {/* Category */}
           <div className="form-group">
@@ -197,7 +261,7 @@ export default function PostPrayerPage() {
           )}
 
           <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '16px' }}>
-            {t('sharingWith')} {user?.assemblyName || t('yourCommunity')}
+            {t('sharingWith')} {isGuest ? (assemblyName || 'your community') : (user?.assemblyName || t('yourCommunity'))}
           </p>
 
           <button
