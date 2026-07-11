@@ -50,16 +50,29 @@ export default function LoginPage() {
     onSuccess: async (tokenResponse) => {
       try {
         setLoading(true);
-        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        
-        if (!res.ok) {
-          throw new Error('Failed to fetch Google profile');
+        setError('');
+
+        // Step 1: Fetch Google profile
+        let profile;
+        try {
+          const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+          });
+          
+          if (!res.ok) {
+            throw new Error('Failed to fetch Google profile');
+          }
+          
+          profile = await res.json();
+        } catch (fetchErr) {
+          throw new Error(
+            fetchErr.message.includes('fetch')
+              ? 'Network error: Unable to reach Google. Please check your internet connection.'
+              : fetchErr.message
+          );
         }
-        
-        const profile = await res.json();
-        
+
+        // Step 2: Send profile to our backend
         const data = await googleLogin({
           email: profile.email,
           name: profile.name,
@@ -70,13 +83,13 @@ export default function LoginPage() {
         handleSuccess(data.user);
       } catch (err) {
         console.error('Google auth error:', err);
-        setError(`Google Login failed: ${err.message}`);
+        setError(err.message || 'Google Login failed. Please try again.');
         setLoading(false);
       }
     },
     onError: (errorResponse) => {
       console.error('Google popup error:', errorResponse);
-      setError(`Google Login popup failed. Make sure popups are allowed.`);
+      setError('Google Login popup failed. Make sure popups are allowed and try again.');
       setLoading(false);
     }
   });
