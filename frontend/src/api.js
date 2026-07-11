@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_URL = import.meta.env.VITE_API_URL || 
+  (typeof window !== 'undefined' && window.location.hostname && !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1')
+    ? 'https://prayer-wall-backend-production.up.railway.app/api'
+    : 'http://localhost:8080/api');
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');
