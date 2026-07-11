@@ -65,8 +65,8 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// POST /api/testimonials — Submit testimony for an answered prayer
-router.post('/', auth, async (req, res) => {
+// POST /api/testimonials — Submit testimony for an answered prayer (supports guests)
+router.post('/', optionalAuth, async (req, res) => {
   try {
     const { prayerId, testimonyText } = req.body;
 
@@ -74,15 +74,22 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Prayer ID and testimony text are required' });
     }
 
-    // Verify the prayer is answered and belongs to user
-    const prayer = await PrayerRequest.findOne({
-      _id: prayerId,
-      userId: req.user._id,
-      status: 'answered',
-    });
+    // Verify the prayer is answered
+    const prayer = await PrayerRequest.findById(prayerId);
 
     if (!prayer) {
-      return res.status(404).json({ message: 'Answered prayer not found' });
+      return res.status(404).json({ message: 'Prayer request not found' });
+    }
+
+    if (prayer.status !== 'answered') {
+      return res.status(400).json({ message: 'Testimonies can only be submitted for answered prayers' });
+    }
+
+    // Owner check: if prayer is owned by a registered user, require auth matching
+    if (prayer.userId) {
+      if (!req.user || prayer.userId.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ message: 'Not authorized to submit testimony for this prayer' });
+      }
     }
 
     // Check if testimony already exists
@@ -93,7 +100,7 @@ router.post('/', auth, async (req, res) => {
 
     const testimony = new Testimony({
       prayerId,
-      userId: req.user._id,
+      userId: req.user?._id || undefined,
       testimonyText,
     });
 
