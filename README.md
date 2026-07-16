@@ -35,8 +35,6 @@ Prayer Wall/
 
 ---
 
-Now when you log in, you'll see the Admin tab in the bottom navigation.
-
 
 ## 📱 Features
 
