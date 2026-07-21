@@ -219,6 +219,11 @@ router.post('/:id/undo-answered', optionalAuth, async (req, res) => {
 // GET /api/prayers/:id — Single prayer detail
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
+    // Validate that id looks like a valid MongoDB ObjectId before querying
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'Invalid prayer ID' });
+    }
+
     const prayer = await PrayerRequest.findById(req.params.id).lean();
     if (!prayer) {
       return res.status(404).json({ message: 'Prayer not found' });
