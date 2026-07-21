@@ -4,7 +4,7 @@ const isLocalhost = typeof window !== 'undefined' &&
 
 const API_URL = import.meta.env.VITE_API_URL || (isLocalhost
   ? 'http://localhost:8080/api'
-  : 'https://prayer-wall-backend-production.up.railway.app/api');
+  : 'https://prayer-wall-w80h.onrender.com/api');
 
 const getHeaders = () => {
   const token = localStorage.getItem('token');
