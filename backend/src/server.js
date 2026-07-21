@@ -19,16 +19,21 @@ const PORT = process.env.PORT || 8080;
 // Middleware
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',')
-  .map(url => url.trim());
+  .map(url => url.trim().replace(/\/+$/, '')); // strip trailing slashes
+
+console.log('🌐 Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
+    // Normalize: strip trailing slash from incoming origin
+    const normalizedOrigin = origin.replace(/\/+$/, '');
     // Allow any *.vercel.app subdomain (covers all preview/branch deployments)
-    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    if (normalizedOrigin.endsWith('.vercel.app')) return callback(null, true);
     // Allow explicitly listed origins (localhost, custom domains, etc.)
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
+    console.warn('⚠️ CORS blocked origin:', origin);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
