@@ -83,6 +83,9 @@ export default function PostPrayerPage() {
   }
 
   if (success) {
+    const displayVerseText = successVerse ? (lang === 'te' ? (successVerse.textTe || successVerse.text) : successVerse.text) : '';
+    const displayVerseRef = successVerse ? (lang === 'te' ? (successVerse.referenceTe || successVerse.reference) : successVerse.reference) : '';
+
     return (
       <>
         <TopHeader title={t('shareYourRequest')} />
@@ -105,7 +108,7 @@ export default function PostPrayerPage() {
           </p>
 
           {/* Show the comforting Bible verse */}
-          {successVerse && successVerse.text && (
+          {successVerse && displayVerseText && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -121,10 +124,10 @@ export default function PostPrayerPage() {
               }}
             >
               <p style={{ fontStyle: 'italic', color: 'var(--color-text-secondary)', margin: 0, fontSize: '0.88rem', lineHeight: '1.6' }}>
-                📖 "{successVerse.text}"
+                📖 "{displayVerseText}"
               </p>
               <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-gold-500)', marginTop: '6px', display: 'inline-block' }}>
-                — {successVerse.reference}
+                — {displayVerseRef}
               </span>
             </motion.div>
           )}

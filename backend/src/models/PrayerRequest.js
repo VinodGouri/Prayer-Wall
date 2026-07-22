@@ -63,6 +63,8 @@ const prayerRequestSchema = new mongoose.Schema({
   bibleVerse: {
     reference: { type: String, default: '' },
     text: { type: String, default: '' },
+    referenceTe: { type: String, default: '' },
+    textTe: { type: String, default: '' },
   },
 }, { timestamps: true });
 

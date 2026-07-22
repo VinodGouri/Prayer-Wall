@@ -107,6 +107,10 @@ export default function PrayerCard({ prayer, onPray }) {
   const categoryEmoji = CATEGORY_EMOJI_MAP[prayer.category] || '✨';
   const categoryClass = CATEGORY_CLASS_MAP[prayer.category] || 'cat-general';
 
+  const isTeluguVerse = (lang === 'te' && !showTranslated) || (lang === 'en' && showTranslated);
+  const displayVerseText = prayer.bibleVerse ? (isTeluguVerse ? (prayer.bibleVerse.textTe || prayer.bibleVerse.text) : prayer.bibleVerse.text) : '';
+  const displayVerseRef = prayer.bibleVerse ? (isTeluguVerse ? (prayer.bibleVerse.referenceTe || prayer.bibleVerse.reference) : prayer.bibleVerse.reference) : '';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -185,7 +189,7 @@ export default function PrayerCard({ prayer, onPray }) {
       </div>
 
       {/* Bible Verse — comforting verse matched to category */}
-      {prayer.bibleVerse && prayer.bibleVerse.text && (
+      {prayer.bibleVerse && displayVerseText && (
         <div style={{
           margin: '4px 0 12px',
           padding: '10px 14px',
@@ -197,10 +201,10 @@ export default function PrayerCard({ prayer, onPray }) {
           lineHeight: '1.5',
         }}>
           <p style={{ fontStyle: 'italic', color: 'var(--color-text-secondary)', margin: 0 }}>
-            📖 "{prayer.bibleVerse.text}"
+            📖 "{displayVerseText}"
           </p>
           <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-primary-600)', marginTop: '4px', display: 'inline-block' }}>
-            — {prayer.bibleVerse.reference}
+            — {displayVerseRef}
           </span>
         </div>
       )}

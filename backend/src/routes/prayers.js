@@ -97,7 +97,12 @@ router.post('/', optionalAuth, async (req, res) => {
 
     // Attach a comforting Bible verse matched to the category + prayer text
     const verse = getVerseForPrayer(category, prayerText);
-    prayer.bibleVerse = { reference: verse.reference, text: verse.text };
+    prayer.bibleVerse = { 
+      reference: verse.reference, 
+      text: verse.text,
+      referenceTe: verse.referenceTe,
+      textTe: verse.textTe 
+    };
 
     await prayer.save();
 
