@@ -2,6 +2,7 @@ const express = require('express');
 const PrayerRequest = require('../models/PrayerRequest');
 const PrayerAction = require('../models/PrayerAction');
 const { auth, optionalAuth } = require('../middleware/auth');
+const { getVerseForPrayer } = require('../utils/bibleVerses');
 
 const router = express.Router();
 
@@ -93,6 +94,10 @@ router.post('/', optionalAuth, async (req, res) => {
       assemblyName,
       phone: phone || '',
     });
+
+    // Attach a comforting Bible verse matched to the category + prayer text
+    const verse = getVerseForPrayer(category, prayerText);
+    prayer.bibleVerse = { reference: verse.reference, text: verse.text };
 
     await prayer.save();
 

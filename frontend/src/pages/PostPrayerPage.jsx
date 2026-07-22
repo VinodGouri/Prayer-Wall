@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import TopHeader from '../components/TopHeader';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
@@ -20,18 +21,19 @@ export default function PostPrayerPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [successVerse, setSuccessVerse] = useState(null);
 
   const CATEGORIES = [
-    { value: 'Health', label: t('catHealth') },
-    { value: 'Marriage', label: t('catMarriage') },
-    { value: 'Family', label: t('catFamily') },
-    { value: 'Financial', label: t('catFinancial') },
-    { value: 'Education', label: t('catEducation') },
-    { value: 'Job', label: t('catJob') },
-    { value: 'Travel', label: t('catTravel') },
-    { value: 'Ministry', label: t('catMinistry') },
-    { value: 'General', label: t('catGeneral') },
-    { value: 'Other', label: t('catOther') },
+    { value: 'Health', label: t('catHealth'), emoji: '💖', colorClass: 'cat-health' },
+    { value: 'Marriage', label: t('catMarriage'), emoji: '💍', colorClass: 'cat-marriage' },
+    { value: 'Family', label: t('catFamily'), emoji: '👨‍👩‍👧‍👦', colorClass: 'cat-family' },
+    { value: 'Financial', label: t('catFinancial'), emoji: '🟢', colorClass: 'cat-financial' },
+    { value: 'Education', label: t('catEducation'), emoji: '📘', colorClass: 'cat-education' },
+    { value: 'Job', label: t('catJob'), emoji: '💼', colorClass: 'cat-job' },
+    { value: 'Travel', label: t('catTravel'), emoji: '✈️', colorClass: 'cat-travel' },
+    { value: 'Ministry', label: t('catMinistry'), emoji: '🕊️', colorClass: 'cat-ministry' },
+    { value: 'General', label: t('catGeneral'), emoji: '✨', colorClass: 'cat-general' },
+    { value: 'Other', label: t('catOther'), emoji: '🌟', colorClass: 'cat-other' },
   ];
 
   useEffect(() => {
@@ -51,28 +53,30 @@ export default function PostPrayerPage() {
           <div className="empty-state-icon">🔒</div>
           <p className="empty-state-title">{t('signInToPost')}</p>
           <p className="empty-state-text">{t('signInToPostDesc')}</p>
-          <button
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             className="submit-btn"
             style={{ maxWidth: '200px', margin: '20px auto 0' }}
             onClick={() => navigate('/login')}
           >
             {t('signIn')}
-          </button>
+          </motion.button>
           
           <div style={{ display: 'flex', alignItems: 'center', margin: '24px auto', width: '80%', maxWidth: '200px' }}>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-            <span style={{ padding: '0 10px', fontSize: '0.8rem', color: '#64748b' }}>{t('or')}</span>
-            <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+            <span style={{ padding: '0 10px', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('or')}</span>
+            <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
           </div>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             className="guest-btn"
             style={{ margin: '0 auto', display: 'block', textDecoration: 'underline' }}
             onClick={() => setPostAsGuest(true)}
             id="post-as-guest-btn"
           >
             {t('shareAsGuest')}
-          </button>
+          </motion.button>
         </div>
       </>
     );
@@ -82,13 +86,51 @@ export default function PostPrayerPage() {
     return (
       <>
         <TopHeader title={t('shareYourRequest')} />
-        <div className="success-msg">
-          <div className="success-msg-icon">🙏</div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="success-msg"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: [0, 1.3, 1] }}
+            transition={{ duration: 0.5 }}
+            className="success-msg-icon"
+          >
+            🙏✨
+          </motion.div>
           <h2 className="success-msg-title">{t('prayerShared')}</h2>
           <p className="success-msg-text">
             {t('prayerSharedDesc')}
           </p>
-          <button
+
+          {/* Show the comforting Bible verse */}
+          {successVerse && successVerse.text && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              style={{
+                margin: '20px auto',
+                maxWidth: '360px',
+                padding: '16px 18px',
+                borderLeft: '3px solid var(--color-gold-400)',
+                background: 'var(--color-gold-100)',
+                borderRadius: '0 12px 12px 0',
+                textAlign: 'left',
+              }}
+            >
+              <p style={{ fontStyle: 'italic', color: 'var(--color-text-secondary)', margin: 0, fontSize: '0.88rem', lineHeight: '1.6' }}>
+                📖 "{successVerse.text}"
+              </p>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-gold-500)', marginTop: '6px', display: 'inline-block' }}>
+                — {successVerse.reference}
+              </span>
+            </motion.div>
+          )}
+
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             className="submit-btn"
             style={{ maxWidth: '240px', margin: '24px auto 0' }}
             onClick={() => {
@@ -98,11 +140,12 @@ export default function PostPrayerPage() {
               setPhone('');
               setAssemblyName('');
               setAnonymous(false);
+              setSuccessVerse(null);
             }}
           >
             {t('shareAnother')}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       </>
     );
   }
@@ -138,6 +181,11 @@ export default function PostPrayerPage() {
         localStorage.setItem('guest_prayer_ids', JSON.stringify(guestIds));
       }
 
+      // Capture the Bible verse returned from backend
+      if (data.prayer?.bibleVerse) {
+        setSuccessVerse(data.prayer.bibleVerse);
+      }
+
       setSuccess(true);
     } catch (err) {
       setError(err.message);
@@ -156,20 +204,20 @@ export default function PostPrayerPage() {
       <div className="post-page">
         {isGuest && (
           <div style={{
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
+            background: 'var(--color-primary-50)',
+            border: '1px solid var(--color-primary-200)',
             borderRadius: '12px',
             padding: '14px',
             marginBottom: '20px',
             fontSize: '0.82rem',
-            color: '#1e40af',
+            color: 'var(--color-primary-600)',
             lineHeight: '1.4'
           }}>
             ℹ️ {t('guestWarning')}
           </div>
         )}
 
-        <form className="post-form" onSubmit={handleSubmit} id="post-prayer-form">
+        <form className="post-form glass-card" onSubmit={handleSubmit} id="post-prayer-form">
           {/* Name */}
           <div className="form-group">
             <label className="form-label">{t('yourName')}</label>
@@ -212,6 +260,29 @@ export default function PostPrayerPage() {
           {/* Category */}
           <div className="form-group">
             <label className="form-label">{t('category')}</label>
+
+            {/* Visual category chips picker */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+              {CATEGORIES.map(cat => (
+                <motion.button
+                  key={cat.value}
+                  type="button"
+                  whileTap={{ scale: 0.94 }}
+                  onClick={() => setCategory(cat.value)}
+                  className={`filter-chip ${cat.colorClass}`}
+                  style={{
+                    opacity: category === cat.value ? 1 : 0.65,
+                    transform: category === cat.value ? 'scale(1.04)' : 'scale(1)',
+                    boxShadow: category === cat.value ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
+                    fontWeight: category === cat.value ? 700 : 500,
+                  }}
+                >
+                  <span style={{ marginRight: '4px' }}>{cat.emoji}</span>
+                  {cat.label}
+                </motion.button>
+              ))}
+            </div>
+
             <select
               className="form-select"
               value={category}
@@ -220,7 +291,7 @@ export default function PostPrayerPage() {
             >
               <option value="">{t('selectCategory')}</option>
               {CATEGORIES.map(cat => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                <option key={cat.value} value={cat.value}>{cat.emoji} {cat.label}</option>
               ))}
             </select>
           </div>
@@ -257,23 +328,25 @@ export default function PostPrayerPage() {
           </div>
 
           {error && (
-            <p style={{ color: '#dc2626', fontSize: '0.85rem', margin: '0 0 12px 0' }}>{error}</p>
+            <p style={{ color: 'var(--color-danger)', fontSize: '0.85rem', margin: '0 0 12px 0' }}>{error}</p>
           )}
 
-          <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '16px' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '16px' }}>
             {t('sharingWith')} {isGuest ? (assemblyName || 'your community') : (user?.assemblyName || t('yourCommunity'))}
           </p>
 
-          <button
+          <motion.button
+            whileTap={{ scale: 0.97 }}
             type="submit"
             className="submit-btn"
             disabled={submitting}
             id="submit-prayer-btn"
           >
             {submitting ? t('sharing') : t('sharePrayerRequest')}
-          </button>
+          </motion.button>
         </form>
       </div>
     </>
   );
 }
+

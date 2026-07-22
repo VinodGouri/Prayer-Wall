@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useLang } from '../context/LanguageContext';
 
 export default function SearchOverlay({ onClose, onSearch }) {
@@ -13,8 +14,20 @@ export default function SearchOverlay({ onClose, onSearch }) {
   };
 
   return (
-    <div className="search-overlay" id="search-overlay">
-      <form onSubmit={handleSearch}>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="search-overlay"
+      id="search-overlay"
+      style={{ background: 'var(--color-surface-card)' }}
+    >
+      <motion.form
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        onSubmit={handleSearch}
+      >
         <div className="search-bar">
           <button type="button" onClick={onClose} aria-label="Close search" style={{ fontSize: '1.1rem' }}>
             ←
@@ -31,13 +44,18 @@ export default function SearchOverlay({ onClose, onSearch }) {
             🔍
           </button>
         </div>
-      </form>
+      </motion.form>
 
       {query.length > 0 && (
-        <div style={{ padding: '20px', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ padding: '20px', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}
+        >
           {t('pressEnterToSearch')} "{query}"
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
+

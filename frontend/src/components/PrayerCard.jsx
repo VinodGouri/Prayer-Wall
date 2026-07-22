@@ -1,6 +1,33 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
+
+const CATEGORY_EMOJI_MAP = {
+  Health: '💖',
+  Marriage: '💍',
+  Family: '👨‍👩‍👧‍👦',
+  Financial: '🟢',
+  Education: '📘',
+  Job: '💼',
+  Travel: '✈️',
+  Ministry: '🕊️',
+  General: '✨',
+  Other: '🌟',
+};
+
+const CATEGORY_CLASS_MAP = {
+  Health: 'cat-health',
+  Marriage: 'cat-marriage',
+  Family: 'cat-family',
+  Financial: 'cat-financial',
+  Education: 'cat-education',
+  Job: 'cat-job',
+  Travel: 'cat-travel',
+  Ministry: 'cat-ministry',
+  General: 'cat-general',
+  Other: 'cat-other',
+};
 
 export default function PrayerCard({ prayer, onPray }) {
   const { isGuest } = useAuth();
@@ -8,10 +35,12 @@ export default function PrayerCard({ prayer, onPray }) {
   const [prayed, setPrayed] = useState(prayer.hasPrayed || false);
   const [count, setCount] = useState(prayer.prayerCount || 0);
   const [animating, setAnimating] = useState(false);
+  const [showHeartBurst, setShowHeartBurst] = useState(false);
 
   const handlePray = async () => {
     if (prayed || isGuest) return;
     setAnimating(true);
+    setShowHeartBurst(true);
     setPrayed(true);
     setCount(c => c + 1);
 
@@ -22,7 +51,10 @@ export default function PrayerCard({ prayer, onPray }) {
       setCount(c => c - 1);
     }
 
-    setTimeout(() => setAnimating(false), 400);
+    setTimeout(() => {
+      setAnimating(false);
+      setShowHeartBurst(false);
+    }, 1000);
   };
 
   const [translatedText, setTranslatedText] = useState(null);
@@ -72,20 +104,32 @@ export default function PrayerCard({ prayer, onPray }) {
 
   const initial = prayer.name?.[0]?.toUpperCase() || '?';
   const displayName = prayer.anonymous ? t('anonymous') : prayer.name;
+  const categoryEmoji = CATEGORY_EMOJI_MAP[prayer.category] || '✨';
+  const categoryClass = CATEGORY_CLASS_MAP[prayer.category] || 'cat-general';
 
   return (
-    <div className="prayer-card" id={`prayer-card-${prayer._id}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="prayer-card glass-card"
+      id={`prayer-card-${prayer._id}`}
+      style={{ position: 'relative', overflow: 'hidden' }}
+    >
       <div className="prayer-card-header">
         <div className="prayer-card-user">
-          <div className="prayer-card-avatar">
-            {prayer.anonymous ? '👤' : initial}
+          <div className="prayer-card-avatar" style={{ background: 'linear-gradient(135deg, #fbcfe8 0%, #fed7aa 100%)', color: '#9d174d' }}>
+            {prayer.anonymous ? '🕊️' : initial}
           </div>
           <div>
             <div className="prayer-card-name">{displayName}</div>
             <div className="prayer-card-assembly">{prayer.assemblyName}</div>
           </div>
         </div>
-        <span className="prayer-card-category">{prayer.category}</span>
+        <span className={`prayer-card-category ${categoryClass}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+          <span>{categoryEmoji}</span>
+          <span>{prayer.category}</span>
+        </span>
       </div>
 
       <p className="prayer-card-text">
@@ -93,8 +137,8 @@ export default function PrayerCard({ prayer, onPray }) {
           <>
             <span style={{
               fontSize: '0.7rem',
-              background: '#eff6ff',
-              color: '#2563eb',
+              background: 'var(--color-primary-50)',
+              color: 'var(--color-primary-600)',
               padding: '2px 6px',
               borderRadius: '4px',
               marginRight: '6px',
@@ -114,13 +158,14 @@ export default function PrayerCard({ prayer, onPray }) {
 
       {/* Translation action button */}
       <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginTop: '-8px', marginBottom: '8px', padding: '0 2px' }}>
-        <button
+        <motion.button
+          whileTap={{ scale: 0.95 }}
           onClick={handleTranslate}
           className="translate-toggle-btn"
           disabled={translating}
           style={{
             fontSize: '0.72rem',
-            color: '#2563eb',
+            color: 'var(--color-primary-600)',
             fontWeight: 600,
             display: 'inline-flex',
             alignItems: 'center',
@@ -133,29 +178,87 @@ export default function PrayerCard({ prayer, onPray }) {
           }}
         >
           {translating ? '⏳' : showTranslated ? '↩️ Original' : `🌐 ${transPairLabel}`}
-        </button>
+        </motion.button>
         {translationError && (
-          <span style={{ fontSize: '0.68rem', color: '#dc2626', marginLeft: '6px' }}>Error translating</span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--color-danger)', marginLeft: '6px' }}>Error translating</span>
         )}
       </div>
 
+      {/* Bible Verse — comforting verse matched to category */}
+      {prayer.bibleVerse && prayer.bibleVerse.text && (
+        <div style={{
+          margin: '4px 0 12px',
+          padding: '10px 14px',
+          borderLeft: '3px solid',
+          borderLeftColor: 'var(--color-primary-400)',
+          background: 'var(--color-primary-50)',
+          borderRadius: '0 8px 8px 0',
+          fontSize: '0.78rem',
+          lineHeight: '1.5',
+        }}>
+          <p style={{ fontStyle: 'italic', color: 'var(--color-text-secondary)', margin: 0 }}>
+            📖 "{prayer.bibleVerse.text}"
+          </p>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--color-primary-600)', marginTop: '4px', display: 'inline-block' }}>
+            — {prayer.bibleVerse.reference}
+          </span>
+        </div>
+      )}
+
       <div className="prayer-card-divider" />
 
-      <div className="prayer-card-footer" style={{ marginBottom: '12px' }}>
+      <div className="prayer-card-footer" style={{ marginBottom: '12px', position: 'relative' }}>
         <span className="prayer-card-count">
-          <span className={`heart-icon ${animating ? 'heart-pop' : ''}`}>❤️</span>{' '}
+          <motion.span
+            animate={animating ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className={`heart-icon ${animating ? 'heart-pop' : ''}`}
+            style={{ display: 'inline-block' }}
+          >
+            ❤️
+          </motion.span>{' '}
           {count} {t('believersPraying')}
         </span>
+
+        {/* Heart particles effect on pray */}
+        <AnimatePresence>
+          {showHeartBurst && (
+            <motion.div
+              initial={{ opacity: 1, scale: 0.5, y: 0 }}
+              animate={{ opacity: 0, scale: 2, y: -50 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.85, ease: 'easeOut' }}
+              style={{
+                position: 'absolute',
+                left: '20px',
+                bottom: '10px',
+                pointerEvents: 'none',
+                fontSize: '1.5rem',
+                zIndex: 10,
+              }}
+            >
+              💖✨🎊
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <button
+      <motion.button
+        whileTap={prayed || isGuest ? {} : { scale: 0.96 }}
+        whileHover={prayed || isGuest ? {} : { translateY: -1 }}
         className={`pray-btn ${prayed ? 'prayed' : ''}`}
         onClick={handlePray}
         disabled={prayed || isGuest}
         id={`pray-btn-${prayer._id}`}
+        style={prayed ? {} : {
+          background: 'linear-gradient(135deg, #f97316 0%, #ec4899 100%)',
+          boxShadow: '0 4px 14px rgba(249, 115, 22, 0.35)',
+        }}
       >
-        {prayed ? t('yourePraying') : t('imPraying')}
-      </button>
-    </div>
+        {prayed ? `🙏 ${t('yourePraying')}` : `❤️ ${t('imPraying')}`}
+      </motion.button>
+    </motion.div>
   );
 }
+
+

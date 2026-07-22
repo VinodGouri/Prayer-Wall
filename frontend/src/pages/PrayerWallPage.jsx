@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import TopHeader from '../components/TopHeader';
 import PrayerCard from '../components/PrayerCard';
 import SearchOverlay from '../components/SearchOverlay';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { useLang } from '../context/LanguageContext';
 import api from '../api';
 
@@ -53,39 +55,50 @@ export default function PrayerWallPage() {
     <>
       <TopHeader title={t('prayerWall')} onSearchOpen={() => setShowSearch(true)} />
 
-      {showSearch && (
-        <SearchOverlay
-          onClose={() => setShowSearch(false)}
-          onSearch={handleSearch}
-        />
-      )}
+      <AnimatePresence>
+        {showSearch && (
+          <SearchOverlay
+            onClose={() => setShowSearch(false)}
+            onSearch={handleSearch}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Hero section */}
-      <div className="wall-hero">
-        <p className="wall-hero-label">{t('morningDevotion')}</p>
+      <div className="wall-hero" style={{
+        borderRadius: '0 0 28px 28px',
+        marginBottom: '12px',
+        background: 'linear-gradient(135deg, rgba(254, 215, 170, 0.5) 0%, rgba(251, 207, 232, 0.5) 50%, rgba(224, 231, 255, 0.5) 100%)',
+        borderBottom: '1px solid rgba(249, 115, 22, 0.15)',
+        padding: '24px 20px 20px',
+      }}>
+        <p className="wall-hero-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#ea580c', fontWeight: 700 }}>
+          <span>🌅</span> {t('morningDevotion')}
+        </p>
         <h1 className="wall-hero-title">{t('heroTitle')}</h1>
       </div>
 
       {/* Sort chips */}
       <div className="filter-chips">
         {SORT_OPTIONS.map(opt => (
-          <button
+          <motion.button
             key={opt.key}
+            whileTap={{ scale: 0.94 }}
             className={`filter-chip ${sort === opt.key ? 'active' : ''}`}
             onClick={() => { setSort(opt.key); setPage(1); }}
             id={`sort-${opt.key}`}
           >
             {opt.label}
-          </button>
+          </motion.button>
         ))}
       </div>
 
       {search && (
         <div style={{ padding: '0 20px 8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '0.85rem', color: '#64748b' }}>{t('resultsFor')} "{search}"</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>{t('resultsFor')} "{search}"</span>
           <button
             onClick={() => { setSearch(''); setPage(1); }}
-            style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: 600 }}
+            style={{ fontSize: '0.8rem', color: 'var(--color-primary-500)', fontWeight: 600 }}
           >
             {t('clear')}
           </button>
@@ -94,9 +107,8 @@ export default function PrayerWallPage() {
 
       {/* Prayer list */}
       {loading ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">🙏</div>
-          <p className="empty-state-text">{t('loadingPrayers')}</p>
+        <div style={{ paddingTop: '8px' }}>
+          <SkeletonLoader count={4} />
         </div>
       ) : prayers.length === 0 ? (
         <div className="empty-state">
@@ -106,9 +118,21 @@ export default function PrayerWallPage() {
         </div>
       ) : (
         <>
-          {prayers.map(prayer => (
-            <PrayerCard key={prayer._id} prayer={prayer} onPray={handlePray} />
-          ))}
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: 0.08 },
+              },
+            }}
+          >
+            {prayers.map(prayer => (
+              <PrayerCard key={prayer._id} prayer={prayer} onPray={handlePray} />
+            ))}
+          </motion.div>
 
           {totalPages > 1 && (
             <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '20px' }}>
@@ -119,7 +143,7 @@ export default function PrayerWallPage() {
               >
                 {t('prev')}
               </button>
-              <span style={{ padding: '8px', fontSize: '0.85rem', color: '#64748b' }}>
+              <span style={{ padding: '8px', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
                 {page} / {totalPages}
               </span>
               <button
@@ -136,3 +160,4 @@ export default function PrayerWallPage() {
     </>
   );
 }
+

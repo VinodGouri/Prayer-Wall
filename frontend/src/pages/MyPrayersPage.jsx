@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import TopHeader from '../components/TopHeader';
 import ConfirmModal from '../components/ConfirmModal';
 import UndoToast from '../components/UndoToast';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
 import api from '../api';
@@ -122,13 +124,14 @@ export default function MyPrayersPage() {
           <div className="empty-state-icon">🔒</div>
           <p className="empty-state-title">{t('signInToView')}</p>
           <p className="empty-state-text">{t('signInToViewDesc')}</p>
-          <button
+          <motion.button
+            whileTap={{ scale: 0.95 }}
             className="submit-btn"
             style={{ maxWidth: '200px', margin: '20px auto 0' }}
             onClick={() => navigate('/login')}
           >
             {t('signIn')}
-          </button>
+          </motion.button>
         </div>
       </>
     );
@@ -143,26 +146,40 @@ export default function MyPrayersPage() {
 
         {isGuest && guestIds.length > 0 && (
           <div style={{
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
+            background: 'var(--color-primary-50)',
+            border: '1px solid var(--color-primary-200)',
             borderRadius: '12px',
             padding: '14px',
-            marginBottom: '20px',
+            margin: '16px 20px 0',
             fontSize: '0.82rem',
-            color: '#1e40af',
+            color: 'var(--color-primary-600)',
             lineHeight: '1.4'
           }}>
             ℹ️ {t('guestWarning')}
           </div>
         )}
 
-        <div className="tabs">
+        <div className="tabs" style={{ position: 'relative' }}>
           <button
             className={`tab ${tab === 'active' ? 'active' : ''}`}
             onClick={() => setTab('active')}
             id="tab-active"
           >
             {t('active')}
+            {tab === 'active' && (
+              <motion.div
+                layoutId="myPrayersTab"
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  left: 0,
+                  right: 0,
+                  height: '2.5px',
+                  background: 'var(--color-primary-600)',
+                  borderRadius: '2px',
+                }}
+              />
+            )}
           </button>
           <button
             className={`tab ${tab === 'answered' ? 'active' : ''}`}
@@ -170,12 +187,26 @@ export default function MyPrayersPage() {
             id="tab-answered"
           >
             {t('answered')}
+            {tab === 'answered' && (
+              <motion.div
+                layoutId="myPrayersTab"
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  left: 0,
+                  right: 0,
+                  height: '2.5px',
+                  background: 'var(--color-primary-600)',
+                  borderRadius: '2px',
+                }}
+              />
+            )}
           </button>
         </div>
 
         {loading ? (
-          <div className="empty-state">
-            <p className="empty-state-text">{t('loading')}</p>
+          <div style={{ paddingTop: '16px' }}>
+            <SkeletonLoader count={3} />
           </div>
         ) : tab === 'active' ? (
           activePrayers.length === 0 ? (
@@ -186,7 +217,14 @@ export default function MyPrayersPage() {
             </div>
           ) : (
             activePrayers.map(prayer => (
-              <div className="my-prayer-card" key={prayer._id} id={`my-prayer-${prayer._id}`}>
+              <motion.div
+                key={prayer._id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                className="my-prayer-card glass-card"
+                id={`my-prayer-${prayer._id}`}
+              >
                 <div className="my-prayer-card-top">
                   <span className="prayer-card-category">{prayer.category}</span>
                   <span className="my-prayer-card-date">{t('added')} {formatDate(prayer.createdAt)}</span>
@@ -194,15 +232,16 @@ export default function MyPrayersPage() {
                 <p className="my-prayer-card-text">{prayer.prayerText}</p>
                 <div className="my-prayer-card-footer">
                   <span className="my-prayer-count">{prayer.prayerCount} {t('peoplePrayed')}</span>
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
                     className="mark-answered-btn"
                     onClick={() => setConfirmPrayer(prayer)}
                     id={`mark-answered-${prayer._id}`}
                   >
                     {t('markAnswered')}
-                  </button>
+                  </motion.button>
                 </div>
-              </div>
+              </motion.div>
             ))
           )
         ) : (
@@ -214,7 +253,13 @@ export default function MyPrayersPage() {
             </div>
           ) : (
             answeredPrayers.map(prayer => (
-              <div className="my-prayer-card" key={prayer._id} id={`answered-prayer-${prayer._id}`}>
+              <motion.div
+                key={prayer._id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="my-prayer-card glass-card"
+                id={`answered-prayer-${prayer._id}`}
+              >
                 <div className="my-prayer-card-top">
                   <span className="prayer-card-category">{prayer.category}</span>
                   <span className="answered-badge">{t('godAnswered')}</span>
@@ -225,77 +270,98 @@ export default function MyPrayersPage() {
                   <span className="my-prayer-card-date">{t('answered')} {formatDate(prayer.answeredAt)}</span>
                 </div>
                 {!prayer.testimony && (
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
                     className="submit-btn"
                     style={{ marginTop: '12px', fontSize: '0.85rem', padding: '10px' }}
                     onClick={() => setTestimonyModal(prayer)}
                   >
                     {t('shareTestimony')}
-                  </button>
+                  </motion.button>
                 )}
                 {prayer.testimony && (
                   <div style={{
-                    marginTop: '12px', padding: '12px', background: '#fef9c3',
-                    borderRadius: '8px', fontSize: '0.85rem', color: '#713f12',
+                    marginTop: '12px', padding: '12px', background: 'var(--color-gold-100)',
+                    borderRadius: '8px', fontSize: '0.85rem', color: 'var(--color-gold-500)',
+                    border: '1px solid var(--color-gold-200)',
                   }}>
                     <strong>{t('yourTestimony')}</strong> {prayer.testimony.testimonyText}
                     <br />
-                    <span style={{ fontSize: '0.75rem', color: '#a16207' }}>
+                    <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>
                       {t('status')}: {prayer.testimony.status}
                     </span>
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))
           )
         )}
       </div>
 
       {/* Mark Answered Confirmation Modal */}
-      {confirmPrayer && (
-        <ConfirmModal
-          title={t('hasGodAnswered')}
-          text={t('confirmModalText')}
-          confirmText={t('yesAnswered')}
-          cancelText={t('notYet')}
-          onConfirm={handleMarkAnswered}
-          onCancel={() => setConfirmPrayer(null)}
-        />
-      )}
+      <AnimatePresence>
+        {confirmPrayer && (
+          <ConfirmModal
+            title={t('hasGodAnswered')}
+            text={t('confirmModalText')}
+            confirmText={t('yesAnswered')}
+            cancelText={t('notYet')}
+            onConfirm={handleMarkAnswered}
+            onCancel={() => setConfirmPrayer(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Undo Toast */}
-      {undoPrayer && (
-        <UndoToast
-          message={t('markedAsAnswered')}
-          onUndo={handleUndo}
-          duration={5000}
-        />
-      )}
+      <AnimatePresence>
+        {undoPrayer && (
+          <UndoToast
+            message={t('markedAsAnswered')}
+            onUndo={handleUndo}
+            duration={5000}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Testimony Submission Modal */}
-      {testimonyModal && (
-        <div className="modal-overlay" onClick={() => setTestimonyModal(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <h3 className="modal-title">{t('shareYourTestimony')}</h3>
-            <p className="modal-text">
-              {t('testimonyModalDesc')}
-            </p>
-            <textarea
-              className="form-textarea"
-              placeholder={t('testimonyPlaceholder')}
-              value={testimonyText}
-              onChange={e => setTestimonyText(e.target.value)}
-              style={{ marginBottom: '16px' }}
-            />
-            <button className="modal-btn-primary" onClick={handleSubmitTestimony}>
-              {t('submitTestimony')}
-            </button>
-            <button className="modal-btn-secondary" onClick={() => setTestimonyModal(null)}>
-              {t('skipForNow')}
-            </button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {testimonyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={() => setTestimonyModal(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="modal-content glass-card"
+              onClick={e => e.stopPropagation()}
+            >
+              <h3 className="modal-title">{t('shareYourTestimony')}</h3>
+              <p className="modal-text">
+                {t('testimonyModalDesc')}
+              </p>
+              <textarea
+                className="form-textarea"
+                placeholder={t('testimonyPlaceholder')}
+                value={testimonyText}
+                onChange={e => setTestimonyText(e.target.value)}
+                style={{ marginBottom: '16px' }}
+              />
+              <button className="modal-btn-primary" onClick={handleSubmitTestimony}>
+                {t('submitTestimony')}
+              </button>
+              <button className="modal-btn-secondary" onClick={() => setTestimonyModal(null)}>
+                {t('skipForNow')}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
+

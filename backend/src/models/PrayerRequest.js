@@ -60,6 +60,10 @@ const prayerRequestSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  bibleVerse: {
+    reference: { type: String, default: '' },
+    text: { type: String, default: '' },
+  },
 }, { timestamps: true });
 
 // Index for efficient queries

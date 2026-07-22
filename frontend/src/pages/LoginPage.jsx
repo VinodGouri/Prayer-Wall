@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LanguageContext';
 
@@ -104,45 +105,70 @@ export default function LoginPage() {
   return (
     <div className="login-page" id="login-page">
       {/* Language toggle on login page */}
-      <button
+      <motion.button
+        whileTap={{ scale: 0.9 }}
         className="lang-toggle-btn"
         onClick={toggleLang}
         aria-label="Toggle language"
-        style={{ position: 'absolute', top: '16px', right: '16px' }}
+        style={{ position: 'absolute', top: '20px', right: '20px' }}
         title={lang === 'en' ? 'తెలుగులో చూడండి' : 'View in English'}
       >
         {lang === 'en' ? 'తె' : 'EN'}
-      </button>
+      </motion.button>
 
-      <div className="login-icon">⛪</div>
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4 }}
+        className="login-icon"
+        style={{ fontSize: '3.5rem', filter: 'drop-shadow(0 4px 12px rgba(249, 115, 22, 0.3))' }}
+      >
+        🕊️
+      </motion.div>
       <h1 className="login-title">{t('loginTitle')}</h1>
       <p className="login-subtitle">
         {t('loginSubtitle')}
       </p>
 
-      <div style={{ width: '100%', maxWidth: '300px', marginBottom: '24px' }}>
-        <button 
+      <div style={{ width: '100%', maxWidth: '320px', marginBottom: '24px' }}>
+        <motion.button 
+          whileTap={{ scale: 0.97 }}
           className="google-btn" 
           onClick={() => handleGoogle()}
           type="button"
           disabled={loading}
+          style={{ width: '100%', maxWidth: 'none' }}
         >
           <span style={{ fontSize: '1.2rem' }}>G</span> {t('continueWithGoogle')}
-        </button>
+        </motion.button>
 
         <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0' }}>
-          <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
-          <span style={{ padding: '0 10px', fontSize: '0.8rem', color: '#64748b' }}>{t('or')}</span>
-          <div style={{ flex: 1, height: '1px', background: '#e2e8f0' }} />
+          <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+          <span style={{ padding: '0 10px', fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{t('or')}</span>
+          <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
         </div>
 
-        <div className="tabs" style={{ margin: '0 0 20px 0' }}>
+        <div className="tabs" style={{ margin: '0 0 20px 0', position: 'relative' }}>
           <button
             type="button"
             className={`tab ${mode === 'login' ? 'active' : ''}`}
             onClick={() => setMode('login')}
           >
             {t('signIn')}
+            {mode === 'login' && (
+              <motion.div
+                layoutId="loginTab"
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  background: 'var(--color-primary-600)',
+                  borderRadius: '1px',
+                }}
+              />
+            )}
           </button>
           <button
             type="button"
@@ -150,12 +176,31 @@ export default function LoginPage() {
             onClick={() => setMode('register')}
           >
             {t('register')}
+            {mode === 'register' && (
+              <motion.div
+                layoutId="loginTab"
+                style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  left: 0,
+                  right: 0,
+                  height: '2px',
+                  background: 'var(--color-primary-600)',
+                  borderRadius: '1px',
+                }}
+              />
+            )}
           </button>
         </div>
 
         <form onSubmit={handleSubmit}>
           {mode === 'register' && (
-            <div className="form-group">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="form-group"
+            >
               <input
                 type="text"
                 className="form-input"
@@ -163,7 +208,7 @@ export default function LoginPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
-            </div>
+            </motion.div>
           )}
           
           <div className="form-group">
@@ -199,20 +244,21 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p style={{ color: '#dc2626', fontSize: '0.85rem', marginBottom: '12px', textAlign: 'center' }}>
+            <p style={{ color: 'var(--color-danger)', fontSize: '0.85rem', marginBottom: '12px', textAlign: 'center' }}>
               {error}
             </p>
           )}
 
-          <button type="submit" className="submit-btn" disabled={loading}>
+          <motion.button whileTap={{ scale: 0.97 }} type="submit" className="submit-btn" disabled={loading}>
             {loading ? t('processing') : (mode === 'login' ? t('signIn') : t('createAccount'))}
-          </button>
+          </motion.button>
         </form>
       </div>
 
-      <button className="guest-btn" onClick={handleGuest} id="guest-btn">
+      <motion.button whileTap={{ scale: 0.95 }} className="guest-btn" onClick={handleGuest} id="guest-btn">
         {t('continueAsGuest')}
-      </button>
+      </motion.button>
     </div>
   );
 }
+

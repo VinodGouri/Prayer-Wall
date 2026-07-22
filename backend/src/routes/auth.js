@@ -23,6 +23,8 @@ const getUserResponse = (user) => ({
   role: user.role,
   avatar: user.avatar,
   assemblyName: user.assemblyName,
+  phone: user.phone || '',
+  profilePhoto: user.profilePhoto || '',
   mustChangePassword: user.mustChangePassword || false,
 });
 
@@ -175,12 +177,14 @@ router.post('/google', async (req, res) => {
 // PUT /api/auth/profile
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { assemblyName } = req.body;
+    const { assemblyName, name, phone, profilePhoto } = req.body;
     
-    if (assemblyName) {
-      req.user.assemblyName = assemblyName;
-      await req.user.save();
-    }
+    if (assemblyName !== undefined) req.user.assemblyName = assemblyName;
+    if (name !== undefined && name.trim()) req.user.name = name.trim();
+    if (phone !== undefined) req.user.phone = phone;
+    if (profilePhoto !== undefined) req.user.profilePhoto = profilePhoto;
+
+    await req.user.save();
 
     res.json({ user: getUserResponse(req.user) });
   } catch (error) {
