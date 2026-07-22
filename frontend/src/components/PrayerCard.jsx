@@ -31,7 +31,7 @@ const CATEGORY_CLASS_MAP = {
 
 export default function PrayerCard({ prayer, onPray }) {
   const { isGuest } = useAuth();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [prayed, setPrayed] = useState(prayer.hasPrayed || false);
   const [count, setCount] = useState(prayer.prayerCount || 0);
   const [animating, setAnimating] = useState(false);
