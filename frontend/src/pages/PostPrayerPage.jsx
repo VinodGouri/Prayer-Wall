@@ -9,7 +9,7 @@ import api from '../api';
 export default function PostPrayerPage() {
   const { user, isGuest } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   
   const [postAsGuest, setPostAsGuest] = useState(false);
   const [name, setName] = useState('');
@@ -44,6 +44,20 @@ export default function PostPrayerPage() {
       }
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    let timer;
+    if (success) {
+      timer = setTimeout(() => {
+        setSuccess(false);
+        setPrayerText('');
+        setCategory('');
+        setPhone('');
+        setAssemblyName('');
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [success]);
 
   if (isGuest && !postAsGuest) {
     return (
